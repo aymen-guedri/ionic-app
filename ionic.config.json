@@ -1,0 +1,7 @@
+{
+  "name": "smart-parking",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
