@@ -1,0 +1,234 @@
+.qr-scanner-container {
+  padding: 16px;
+  min-height: 100vh;
+}
+
+.reservation-info-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.reservation-info-card h3 {
+  margin: 0 0 12px 0;
+  color: var(--ion-color-primary);
+  text-align: center;
+}
+
+.scanner-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.scanner-content {
+  text-align: center;
+  padding: 20px;
+}
+
+.qr-icon {
+  font-size: 80px;
+  color: var(--ion-color-primary);
+  margin-bottom: 16px;
+}
+
+.scanner-content h2 {
+  margin: 0 0 12px 0;
+  color: var(--ion-color-primary);
+}
+
+.scanner-content p {
+  margin: 0 0 24px 0;
+  color: var(--ion-color-medium);
+  line-height: 1.5;
+}
+
+.scan-button {
+  --background: linear-gradient(45deg, var(--ion-color-primary), var(--ion-color-secondary));
+  --color: white;
+  font-weight: bold;
+  margin-top: 16px;
+}
+
+.scanned-data-card {
+  margin-bottom: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-left: 4px solid var(--ion-color-success);
+}
+
+.scanned-data-card h3 {
+  margin: 0 0 12px 0;
+  color: var(--ion-color-success);
+}
+
+.instructions-card {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  background: var(--ion-color-light);
+}
+
+.instructions-card h3 {
+  margin: 0 0 12px 0;
+  color: var(--ion-color-primary);
+}
+
+.instructions-card ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.instructions-card li {
+  margin-bottom: 8px;
+  color: var(--ion-color-medium);
+  line-height: 1.4;
+}
+
+/* QR Scanner Camera Overlay */
+.qr-scanner-active {
+  background: transparent !important;
+}
+
+.qr-scanner-active .qr-scanner-container {
+  display: none;
+}
+
+/* Scanner Overlay Styles */
+.scanner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scanner-frame {
+  width: 250px;
+  height: 250px;
+  border: 2px solid var(--ion-color-primary);
+  border-radius: 12px;
+  position: relative;
+  background: transparent;
+}
+
+.scanner-frame::before,
+.scanner-frame::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--ion-color-primary);
+}
+
+.scanner-frame::before {
+  top: -3px;
+  left: -3px;
+  border-right: none;
+  border-bottom: none;
+}
+
+.scanner-frame::after {
+  bottom: -3px;
+  right: -3px;
+  border-left: none;
+  border-top: none;
+}
+
+.scanner-instructions {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  text-align: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  max-width: 300px;
+}
+
+.scanner-controls {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+}
+
+.scanner-controls ion-button {
+  --border-radius: 50%;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --padding-top: 16px;
+  --padding-bottom: 16px;
+}
+
+/* Animation for scanning */
+@keyframes scan-line {
+  0% {
+    top: 0;
+  }
+  100% {
+    top: 100%;
+  }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ion-color-primary);
+  animation: scan-line 2s linear infinite;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .qr-scanner-container {
+    padding: 12px;
+  }
+  
+  .qr-icon {
+    font-size: 60px;
+  }
+  
+  .scanner-content {
+    padding: 16px;
+  }
+  
+  .scanner-frame {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .scanner-instructions {
+    bottom: 80px;
+    max-width: 250px;
+    font-size: 14px;
+  }
+  
+  .scanner-controls {
+    bottom: 30px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .instructions-card {
+    background: var(--ion-color-dark);
+    border: 1px solid var(--ion-color-medium);
+  }
+  
+  .reservation-info-card,
+  .scanner-card,
+  .scanned-data-card {
+    background: var(--ion-color-dark);
+    border: 1px solid var(--ion-color-medium);
+  }
+}

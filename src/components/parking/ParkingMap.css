@@ -1,0 +1,281 @@
+.parking-map-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.parking-map-container {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.parking-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(45deg, #e8e8e8 25%, transparent 25%),
+    linear-gradient(-45deg, #e8e8e8 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #e8e8e8 75%),
+    linear-gradient(-45deg, transparent 75%, #e8e8e8 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+}
+
+.parking-spot {
+  position: absolute;
+  width: 40px;
+  height: 60px;
+  border: 2px solid #fff;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  transform-style: preserve-3d;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.parking-spot.clickable:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.parking-spot.selected {
+  border-color: #3880ff;
+  border-width: 3px;
+  transform: translateY(-2px) scale(1.1);
+  box-shadow: 0 6px 20px rgba(56, 128, 255, 0.4);
+}
+
+.parking-spot.covered {
+  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.1) 25%, transparent 25%);
+}
+
+.parking-spot.large {
+  width: 50px;
+  height: 70px;
+}
+
+.parking-spot.compact {
+  width: 35px;
+  height: 50px;
+}
+
+.spot-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.spot-content ion-icon {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.spot-number {
+  font-size: 10px;
+  line-height: 1;
+}
+
+.accessibility-icon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #3880ff;
+  color: white;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+}
+
+.spot-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 8px;
+  z-index: 1000;
+}
+
+.tooltip-content {
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.tooltip-content h4 {
+  margin: 0 0 4px 0;
+  font-size: 14px;
+  color: #3880ff;
+}
+
+.tooltip-content p {
+  margin: 2px 0;
+}
+
+.spot-features {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.spot-features ion-badge {
+  font-size: 8px;
+  padding: 2px 4px;
+}
+
+.zone-label {
+  position: absolute;
+  background: rgba(56, 128, 255, 0.9);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.zone-a {
+  top: 20px;
+  left: 20px;
+}
+
+.zone-b {
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.zone-c {
+  top: 20px;
+  right: 20px;
+}
+
+.entrance, .exit {
+  position: absolute;
+  background: #10dc60;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.entrance {
+  bottom: 20px;
+  left: 20px;
+}
+
+.exit {
+  bottom: 20px;
+  right: 20px;
+  background: #f04141;
+}
+
+.road {
+  position: absolute;
+  background: #666;
+  border-radius: 2px;
+}
+
+.road-main {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+}
+
+.road-secondary {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 20px;
+  transform: translateY(-50%);
+}
+
+.map-legend {
+  position: absolute;
+  top: 60px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.map-legend h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  margin-right: 6px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .parking-map-container {
+    height: 400px;
+  }
+  
+  .parking-spot {
+    width: 30px;
+    height: 45px;
+  }
+  
+  .parking-spot.large {
+    width: 38px;
+    height: 55px;
+  }
+  
+  .parking-spot.compact {
+    width: 25px;
+    height: 38px;
+  }
+  
+  .spot-content ion-icon {
+    font-size: 12px;
+  }
+  
+  .spot-number {
+    font-size: 8px;
+  }
+  
+  .map-legend {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 12px;
+  }
+}

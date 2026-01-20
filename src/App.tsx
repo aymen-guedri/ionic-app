@@ -1,7 +1,10 @@
 import { Redirect, Route } from 'react-router-dom';
 import { IonApp, IonRouterOutlet, setupIonicReact } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import Home from './pages/Home';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import AuthPage from './pages/AuthPage';
+import AdminTabsLayout from './components/layout/AdminTabsLayout';
+import TabsLayout from './components/layout/TabsLayout';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -35,19 +38,51 @@ import './theme/variables.css';
 
 setupIonicReact();
 
-const App: React.FC = () => (
-  <IonApp>
-    <IonReactRouter>
+const AppRoutes: React.FC = () => {
+  const { currentUser } = useAuth();
+
+  if (currentUser) {
+    // Admin users get admin tabs layout
+    if (currentUser.role === 'admin') {
+      return (
+        <IonRouterOutlet>
+          <Route path="/admin" component={AdminTabsLayout} />
+          <Route exact path="/" render={() => <Redirect to="/admin" />} />
+          <Route exact path="/tabs" render={() => <Redirect to="/admin" />} />
+          <Route exact path="/auth" render={() => <Redirect to="/admin" />} />
+        </IonRouterOutlet>
+      );
+    }
+    // Regular users get tabs layout
+    else {
+      return (
+        <IonRouterOutlet>
+          <Route path="/tabs" component={TabsLayout} />
+          <Route exact path="/" render={() => <Redirect to="/tabs" />} />
+          <Route exact path="/auth" render={() => <Redirect to="/tabs" />} />
+        </IonRouterOutlet>
+      );
+    }
+  } else {
+    return (
       <IonRouterOutlet>
-        <Route exact path="/home">
-          <Home />
-        </Route>
-        <Route exact path="/">
-          <Redirect to="/home" />
-        </Route>
+        <Route exact path="/auth" component={AuthPage} />
+        <Route render={() => <Redirect to="/auth" />} />
       </IonRouterOutlet>
-    </IonReactRouter>
-  </IonApp>
-);
+    );
+  }
+};
+
+const App: React.FC = () => {
+  return (
+    <IonApp>
+      <AuthProvider>
+        <IonReactRouter>
+          <AppRoutes />
+        </IonReactRouter>
+      </AuthProvider>
+    </IonApp>
+  );
+};
 
 export default App;
