@@ -17,7 +17,7 @@ interface LoginProps {
   onToggleMode: () => void;
 }
 
-const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
+const Login = ({ onToggleMode }: LoginProps) => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

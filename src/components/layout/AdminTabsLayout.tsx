@@ -16,7 +16,7 @@ import AdminSpots from '../../pages/admin/AdminSpots';
 import AdminUsers from '../../pages/admin/AdminUsers';
 import ProfilePage from '../../pages/ProfilePage';
 
-const AdminTabsLayout: React.FC = () => {
+const AdminTabsLayout = () => {
   return (
     <IonTabs>
       <IonRouterOutlet>

@@ -6,7 +6,7 @@ import Home from '../../pages/Home';
 import ReservationsPage from '../../pages/ReservationsPage';
 import ProfilePage from '../../pages/ProfilePage';
 
-const TabsLayout: React.FC = () => {
+const TabsLayout = () => {
   return (
     <IonTabs>
       <IonRouterOutlet>

@@ -76,7 +76,7 @@ interface Analytics {
   occupancyRate: string;
 }
 
-const AdminPanel: React.FC = () => {
+const AdminPanel = () => {
   const { currentUser } = useAuth();
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [zones, setZones] = useState<ParkingZone[]>([]);

@@ -32,7 +32,7 @@ interface QRScannerProps {
   onClose: () => void;
 }
 
-const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
+const QRScanner = ({ onClose }: QRScannerProps) => {
   const { currentUser } = useAuth();
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; color: string } | null>(null);

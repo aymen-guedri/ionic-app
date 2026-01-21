@@ -29,12 +29,12 @@ interface ReservationModalProps {
   onReserve: (spotId: string, duration: number, startTime: Date) => void;
 }
 
-const ReservationModal: React.FC<ReservationModalProps> = ({
+const ReservationModal = ({
   isOpen,
   onClose,
   spot,
   onReserve
-}) => {
+}: ReservationModalProps) => {
   const [duration, setDuration] = useState<number>(1);
   const [startTime, setStartTime] = useState<string>(new Date().toISOString());
 

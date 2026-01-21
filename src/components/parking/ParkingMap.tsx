@@ -10,7 +10,7 @@ interface ParkingMapProps {
   selectedSpotId?: string;
 }
 
-const ParkingMap: React.FC<ParkingMapProps> = ({ spots, onSpotSelect, selectedSpotId }) => {
+const ParkingMap = ({ spots, onSpotSelect, selectedSpotId }: ParkingMapProps) => {
   const [hoveredSpot, setHoveredSpot] = useState<string | null>(null);
   const [scale, setScale] = useState(1);
   const [position, setPosition] = useState({ x: 0, y: 0 });

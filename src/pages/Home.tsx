@@ -29,7 +29,7 @@ import ParkingMap from '../components/parking/ParkingMap';
 import ReservationModal from '../components/parking/ReservationModal';
 import QRScanner from '../components/qr/QRScanner';
 
-const Home: React.FC = () => {
+const Home = () => {
   const { currentUser } = useAuth();
   const [spots, setSpots] = useState<ParkingSpot[]>([]);
   const [zones, setZones] = useState<ParkingZone[]>([]);
