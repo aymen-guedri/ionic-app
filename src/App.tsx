@@ -43,11 +43,9 @@ const AppRoutes: React.FC = () => {
 
   if (loading) {
     return (
-      <IonRouterOutlet>
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-          <div>Loading...</div>
-        </div>
-      </IonRouterOutlet>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div>Loading...</div>
+      </div>
     );
   }
 
@@ -85,13 +83,13 @@ const AppRoutes: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <IonApp>
-      <AuthProvider>
+    <AuthProvider>
+      <IonApp>
         <IonReactRouter>
           <AppRoutes />
         </IonReactRouter>
-      </AuthProvider>
-    </IonApp>
+      </IonApp>
+    </AuthProvider>
   );
 };
 

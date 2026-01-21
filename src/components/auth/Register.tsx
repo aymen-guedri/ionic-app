@@ -56,9 +56,10 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
 
     try {
       await register(formData.email, formData.password, formData.name, formData.phone);
+      // Force full page reload to ensure auth state is properly set
+      window.location.href = '/';
     } catch (error: any) {
       setError(error.message || 'Failed to create account');
-    } finally {
       setLoading(false);
     }
   };

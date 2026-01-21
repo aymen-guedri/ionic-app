@@ -37,9 +37,10 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
 
     try {
       await login(email, password);
+      // Force full page reload to ensure auth state is properly set
+      window.location.href = '/';
     } catch (error: any) {
       setError(error.message || 'Failed to login');
-    } finally {
       setLoading(false);
     }
   };

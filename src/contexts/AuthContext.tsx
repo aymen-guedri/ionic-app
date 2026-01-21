@@ -175,15 +175,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   return (
     <AuthContext.Provider value={value}>
-      {loading ? (
-        <IonApp>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <div>Loading...</div>
-          </div>
-        </IonApp>
-      ) : (
-        children
-      )}
+      {children}
     </AuthContext.Provider>
   );
 };
