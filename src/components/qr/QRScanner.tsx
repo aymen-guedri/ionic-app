@@ -197,7 +197,6 @@ const QRScanner = ({ onClose }: QRScannerProps) => {
       
       await addDoc(collection(db, 'payments'), paymentData);
       
-      // Update reservation payment status
       await updateDoc(doc(db, 'reservations', userReservation.id), {
         paymentStatus: 'paid',
         paidAt: serverTimestamp(),
@@ -205,7 +204,6 @@ const QRScanner = ({ onClose }: QRScannerProps) => {
         actualEndTime: new Date(Date.now() + duration * 60 * 60 * 1000)
       });
       
-      // Update spot status to occupied with end time
       await updateDoc(doc(db, 'parkingSpots', spotId), {
         status: 'occupied',
         occupiedBy: currentUser.id,
