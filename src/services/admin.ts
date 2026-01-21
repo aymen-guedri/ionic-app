@@ -139,8 +139,8 @@ export const getAnalytics = async () => {
     const spotsSnapshot = await getDocs(collection(db, 'parkingSpots'));
     const usersSnapshot = await getDocs(collection(db, 'users'));
 
-    const reservations = reservationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    const spots = spotsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const reservations = reservationsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reservation));
+    const spots = spotsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ParkingSpot));
     
     const totalReservations = reservations.length;
     const pendingReservations = reservations.filter(r => r.status === 'pending').length;
