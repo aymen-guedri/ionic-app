@@ -39,7 +39,17 @@ import './theme/variables.css';
 setupIonicReact();
 
 const AppRoutes: React.FC = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <IonRouterOutlet>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+          <div>Loading...</div>
+        </div>
+      </IonRouterOutlet>
+    );
+  }
 
   if (currentUser) {
     // Admin users get admin tabs layout
