@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   IonModal,
   IonHeader,
@@ -27,17 +27,35 @@ interface QRPaymentModalProps {
   onClose: () => void;
   spot: ParkingSpot | null;
   onPayment: (spotId: string, duration: number, amount: number) => Promise<void>;
+  reservation?: {
+    duration: number;
+    totalCost: number;
+    spotNumber: string;
+  } | null;
 }
 
-const QRPaymentModal: React.FC<QRPaymentModalProps> = ({ isOpen, onClose, spot, onPayment }) => {
+const QRPaymentModal: React.FC<QRPaymentModalProps> = ({ isOpen, onClose, spot, onPayment, reservation }) => {
   const [duration, setDuration] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [toast, setToast] = useState<{ message: string; color: string } | null>(null);
 
+  useEffect(() => {
+    if (reservation?.duration) {
+      setDuration(reservation.duration);
+    } else {
+      setDuration(1);
+    }
+  }, [reservation]);
+
   const calculateAmount = () => {
+    if (reservation) {
+      return reservation.totalCost;
+    }
     return spot ? spot.pricePerHour * duration : 0;
   };
+
+  const isReservationPayment = !!reservation;
 
   const handlePaymentSuccess = async (paymentId: string) => {
     if (!spot) return;
@@ -79,17 +97,21 @@ const QRPaymentModal: React.FC<QRPaymentModalProps> = ({ isOpen, onClose, spot, 
                 <IonItem>
                   <IonIcon icon={time} slot="start" />
                   <IonLabel>Duration</IonLabel>
-                  <IonSelect
-                    value={duration}
-                    onSelectionChange={e => setDuration(e.detail.value)}
-                  >
-                    <IonSelectOption value={1}>1 hour</IonSelectOption>
-                    <IonSelectOption value={2}>2 hours</IonSelectOption>
-                    <IonSelectOption value={3}>3 hours</IonSelectOption>
-                    <IonSelectOption value={4}>4 hours</IonSelectOption>
-                    <IonSelectOption value={6}>6 hours</IonSelectOption>
-                    <IonSelectOption value={8}>8 hours</IonSelectOption>
-                  </IonSelect>
+                  {isReservationPayment ? (
+                    <IonLabel slot="end">{duration} hours (from reservation)</IonLabel>
+                  ) : (
+                    <IonSelect
+                      value={duration}
+                      onIonChange={e => setDuration(e.detail.value)}
+                    >
+                      <IonSelectOption value={1}>1 hour</IonSelectOption>
+                      <IonSelectOption value={2}>2 hours</IonSelectOption>
+                      <IonSelectOption value={3}>3 hours</IonSelectOption>
+                      <IonSelectOption value={4}>4 hours</IonSelectOption>
+                      <IonSelectOption value={6}>6 hours</IonSelectOption>
+                      <IonSelectOption value={8}>8 hours</IonSelectOption>
+                    </IonSelect>
+                  )}
                 </IonItem>
 
                 <div style={{ margin: '20px 0', textAlign: 'center' }}>

@@ -2,7 +2,6 @@ import { enableNetwork, disableNetwork } from 'firebase/firestore';
 import { db } from './config';
 
 export const handleFirestoreConnectionIssues = () => {
-  // Handle network connectivity issues
   window.addEventListener('online', async () => {
     try {
       await enableNetwork(db);

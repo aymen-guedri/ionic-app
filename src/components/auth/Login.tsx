@@ -10,7 +10,7 @@ import {
   IonText,
   IonLoading
 } from '@ionic/react';
-import { logIn, person, mail, lockClosed } from 'ionicons/icons';
+import { logIn, person, mail, lockClosed, eye, eyeOff } from 'ionicons/icons';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface LoginProps {
@@ -21,6 +21,7 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -37,7 +38,6 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
 
     try {
       await login(email, password);
-      // Force full page reload to ensure auth state is properly set
       window.location.href = '/';
     } catch (error: any) {
       setError(error.message || 'Failed to login');
@@ -56,7 +56,7 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
 
         <form onSubmit={handleLogin}>
           <IonItem>
-            <IonIcon icon={mail} slot="start" color="medium" />
+            <IonIcon icon={mail} slot="start" color="primary" />
             <IonLabel position="stacked">Email</IonLabel>
             <IonInput
               type="email"
@@ -68,15 +68,23 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
           </IonItem>
 
           <IonItem>
-            <IonIcon icon={lockClosed} slot="start" color="medium" />
+            <IonIcon icon={lockClosed} slot="start" color="primary" />
             <IonLabel position="stacked">Password</IonLabel>
             <IonInput
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onIonInput={(e) => setPassword(e.detail.value!)}
               placeholder="Enter your password"
               required
             />
+            <IonButton 
+              fill="clear" 
+              slot="end" 
+              onClick={() => setShowPassword(!showPassword)}
+              size="small"
+            >
+              <IonIcon icon={showPassword ? eyeOff : eye} color="medium" />
+            </IonButton>
           </IonItem>
 
           {error && (
@@ -89,7 +97,9 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
             expand="block"
             type="submit"
             disabled={loading}
+            color="primary"
             className="auth-button"
+            style={{ marginTop: '20px' }}
           >
             <IonIcon icon={logIn} slot="start" />
             Sign In
@@ -99,7 +109,7 @@ const Login: React.FC<LoginProps> = ({ onToggleMode }) => {
         <div className="auth-footer">
           <p>
             Don't have an account?{' '}
-            <IonButton fill="clear" size="small" onClick={onToggleMode}>
+            <IonButton fill="clear" size="small" color="primary" onClick={onToggleMode}>
               Sign Up
             </IonButton>
           </p>

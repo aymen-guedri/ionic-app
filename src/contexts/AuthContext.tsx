@@ -152,7 +152,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    // Timeout fallback to prevent infinite loading
     timeoutId = setTimeout(() => {
       console.log('AuthProvider: Timeout reached, forcing loading to false');
       setLoading(false);

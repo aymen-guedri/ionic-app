@@ -22,15 +22,15 @@ const ParkingMap: React.FC<ParkingMapProps> = ({ spots, onSpotSelect, selectedSp
   const getSpotColor = (spot: ParkingSpot) => {
     switch (spot.status) {
       case 'available':
-        return '#10dc60'; // Green
+        return '#10dc60';
       case 'reserved':
-        return '#ffce00'; // Yellow
+        return '#ffce00';
       case 'occupied':
-        return '#f04141'; // Red
+        return '#f04141';
       case 'maintenance':
-        return '#7044ff'; // Purple
+        return '#7044ff';
       default:
-        return '#92949c'; // Gray
+        return '#92949c';
     }
   };
 

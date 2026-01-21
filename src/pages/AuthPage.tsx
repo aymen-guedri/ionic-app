@@ -27,7 +27,7 @@ const AuthPage: React.FC = () => {
       <IonContent fullscreen className="auth-page">
         <div className="auth-container">
           <div className="auth-logo">
-            <h1>🚗 Smart Parking</h1>
+            <h1>Smart Parking</h1>
             <p>Your premium parking solution</p>
           </div>
 

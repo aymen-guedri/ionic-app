@@ -39,7 +39,6 @@ const Home: React.FC = () => {
   const [isQRScannerOpen, setIsQRScannerOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; color: string } | null>(null);
 
-  // Load zones from Firestore
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'zones'), (snapshot) => {
       const zonesData = snapshot.docs.map(doc => ({
@@ -54,7 +53,6 @@ const Home: React.FC = () => {
     return () => unsubscribe();
   }, []);
 
-  // Load spots from Firestore
   useEffect(() => {
     const spotsQuery = selectedZone === 'all' 
       ? collection(db, 'parkingSpots')

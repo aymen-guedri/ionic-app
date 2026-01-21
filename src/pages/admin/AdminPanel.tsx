@@ -40,7 +40,7 @@ import {
   add, 
   create, 
   trash, 
-  analytics,
+  analytics as analyticsIcon,
   location,
   settings
 } from 'ionicons/icons';
@@ -189,9 +189,10 @@ const AdminPanel: React.FC = () => {
     const loadAnalytics = async () => {
       try {
         const analyticsData = await getAnalytics();
-        setAnalytics(analyticsData);
+        setAnalytics(analyticsData as Analytics);
       } catch (error) {
         console.error('Error loading analytics:', error);
+        setAnalytics(null);
       }
     };
 
@@ -455,7 +456,7 @@ const AdminPanel: React.FC = () => {
             <IonCard>
               <IonCardContent>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                  <IonIcon icon={analytics} color="tertiary" size="large" />
+                  <IonIcon icon={analyticsIcon} color="tertiary" size="large" />
                   <div>
                     <h2>{analytics?.totalRevenue || 0} TND</h2>
                     <p>Total Revenue</p>

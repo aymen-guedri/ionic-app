@@ -27,11 +27,14 @@ import {
   IonModal
 } from '@ionic/react';
 import { refresh, car, time, checkmark, location, person, logOut, settings, qrCode, shield } from 'ionicons/icons';
+import { collection, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../firebase/config';
 import { useAuth } from '../contexts/AuthContext';
 import { ParkingSpot, Reservation } from '../types';
 import ParkingMap from '../components/parking/ParkingMap';
 import ReservationModal from '../components/parking/ReservationModal';
 import QRScanner from '../components/qr/QRScanner';
+import { OccupancyService } from '../services/occupancy';
 import './ParkingPage.css';
 
 const ParkingPage: React.FC = () => {
@@ -66,27 +69,45 @@ const ParkingPage: React.FC = () => {
   ];
 
   useEffect(() => {
-    // For now, use mock data
-    setSpots(mockSpots);
-    setLoading(false);
+    // Connect to real Firebase data
+    const unsubscribe = onSnapshot(collection(db, 'parkingSpots'), (snapshot) => {
+      const spotsData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        occupiedUntil: doc.data().occupiedUntil?.toDate()
+      })) as ParkingSpot[];
+      setSpots(spotsData);
+      setLoading(false);
+    });
 
-    // TODO: Replace with real Firebase listener
-    // const unsubscribe = onSnapshot(collection(db, 'parkingSpots'), (snapshot) => {
-    //   const spotsData = snapshot.docs.map(doc => ({
-    //     id: doc.id,
-    //     ...doc.data()
-    //   })) as ParkingSpot[];
-    //   setSpots(spotsData);
-    //   setLoading(false);
-    // });
+    // Update expired occupancies on load
+    OccupancyService.updateExpiredOccupancies();
 
-    // return () => unsubscribe();
+    return () => unsubscribe();
   }, []);
 
-  const handleSpotSelect = (spot: ParkingSpot) => {
+  const handleSpotSelect = async (spot: ParkingSpot) => {
     if (spot.status === 'available') {
       setSelectedSpot(spot);
       setIsReservationModalOpen(true);
+    } else if (spot.status === 'occupied' && spot.occupiedUntil) {
+      const nextAvailable = await OccupancyService.getNextAvailableTime(spot.id);
+      if (nextAvailable) {
+        setToast({ 
+          message: `Spot ${spot.number} will be available at ${nextAvailable.toLocaleString()}`, 
+          color: 'warning' 
+        });
+      } else {
+        setToast({ 
+          message: `Spot ${spot.number} availability unknown`, 
+          color: 'warning' 
+        });
+      }
+    } else {
+      setToast({ 
+        message: `Spot ${spot.number} is ${spot.status}`, 
+        color: 'warning' 
+      });
     }
   };
 
@@ -99,6 +120,17 @@ const ParkingPage: React.FC = () => {
     try {
       const endTime = new Date(startTime);
       endTime.setHours(endTime.getHours() + duration);
+
+      // Check if spot is available for the requested time
+      const isAvailable = await OccupancyService.isSpotAvailable(spotId, startTime, endTime);
+      if (!isAvailable) {
+        const nextAvailable = await OccupancyService.getNextAvailableTime(spotId);
+        setToast({ 
+          message: `Spot not available for selected time. Next available: ${nextAvailable?.toLocaleString() || 'Unknown'}`, 
+          color: 'danger' 
+        });
+        return;
+      }
 
       const spot = spots.find(s => s.id === spotId);
       if (!spot) return;
@@ -118,18 +150,13 @@ const ParkingPage: React.FC = () => {
         createdAt: new Date()
       };
 
-      // TODO: Add to Firebase
-      // await addDoc(collection(db, 'reservations'), {
-      //   ...reservationData,
-      //   startTime: serverTimestamp(),
-      //   endTime: serverTimestamp(),
-      //   createdAt: serverTimestamp()
-      // });
-
-      // Update spot status locally for now
-      setSpots(prev => prev.map(s => 
-        s.id === spotId ? { ...s, status: 'reserved' as const } : s
-      ));
+      // Add to Firebase
+      await addDoc(collection(db, 'reservations'), {
+        ...reservationData,
+        startTime: serverTimestamp(),
+        endTime: serverTimestamp(),
+        createdAt: serverTimestamp()
+      });
 
       setToast({ 
         message: `Reservation request sent for spot ${spot.number}. Waiting for admin approval.`, 

@@ -119,18 +119,7 @@ const AdminDashboard: React.FC = () => {
             </IonCol>
           </IonRow>
           <IonRow>
-            <IonCol size="12" sizeMd="6">
-              <IonCard>
-                <IonCardContent>
-                  <h3>Occupancy Rate</h3>
-                  <div style={{ fontSize: '2rem', color: 'var(--ion-color-primary)' }}>
-                    {analyticsData?.occupancyRate || '0'}%
-                  </div>
-                  <p>Current parking utilization</p>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-            <IonCol size="12" sizeMd="6">
+            <IonCol size="12">
               <IonCard>
                 <IonCardContent>
                   <h3>Quick Stats</h3>

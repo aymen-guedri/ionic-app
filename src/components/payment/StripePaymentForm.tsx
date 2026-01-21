@@ -39,10 +39,8 @@ const StripePaymentForm: React.FC<StripePaymentFormProps> = ({
     setLoading(true);
     
     try {
-      // Simulate Stripe payment processing
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // For demo - always succeed with test card
       if (cardNumber === '4242424242424242') {
         const paymentId = `pi_test_${Date.now()}`;
         onSuccess(paymentId);

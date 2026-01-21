@@ -11,10 +11,17 @@ import {
   IonCardContent,
   IonToast,
   IonLoading,
-  IonButtons
+  IonButtons,
+  IonInput,
+  IonItem,
+  IonLabel,
+  IonSegment,
+  IonSegmentButton,
+  IonImg
 } from '@ionic/react';
-import { qrCode, close, camera, card } from 'ionicons/icons';
-import { collection, doc, getDoc, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { qrCode, close, camera, card, text } from 'ionicons/icons';
+import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../contexts/AuthContext';
 import { ParkingSpot } from '../../types';
@@ -27,12 +34,15 @@ interface QRScannerProps {
 
 const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
   const { currentUser } = useAuth();
-  const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; color: string } | null>(null);
   const [scannedSpot, setScannedSpot] = useState<ParkingSpot | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [userReservation, setUserReservation] = useState<any>(null);
+  const [scanMode, setScanMode] = useState<'camera' | 'manual'>('camera');
+  const [manualInput, setManualInput] = useState('');
+  const [isScanning, setIsScanning] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   useEffect(() => {
     if (currentUser) {
@@ -62,51 +72,113 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
     }
   };
 
-  const simulateQRScan = async () => {
+  const takePhotoForQR = async () => {
     if (!userReservation) {
       setToast({ message: 'You need an approved reservation to pay', color: 'warning' });
       return;
     }
 
-    setScanning(true);
+    try {
+      setLoading(true);
+      
+      const image = await Camera.getPhoto({
+        quality: 90,
+        allowEditing: false,
+        resultType: CameraResultType.Uri,
+        source: CameraSource.Camera,
+        promptLabelHeader: 'QR Code Scanner',
+        promptLabelPhoto: 'Take Photo of QR Code',
+        promptLabelPicture: 'Select from Gallery',
+        width: 400,
+        height: 400
+      });
+      
+      if (image.webPath) {
+        setCapturedImage(image.webPath);
+        setToast({ 
+          message: 'Photo captured! Now switch to Manual tab to enter the QR code data.', 
+          color: 'success' 
+        });
+        // Auto-switch to manual mode after photo capture
+        setTimeout(() => setScanMode('manual'), 1500);
+      }
+    } catch (error: any) {
+      console.error('Camera error:', error);
+      if (error.message?.includes('cancelled') || error.message?.includes('User cancelled')) {
+        setToast({ message: 'Photo capture cancelled', color: 'warning' });
+      } else {
+        setToast({ message: 'Camera access failed. Please use manual input.', color: 'warning' });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManualInput = () => {
+    if (!manualInput.trim()) {
+      setToast({ message: 'Please enter QR code data', color: 'warning' });
+      return;
+    }
+    handleQRResult(manualInput.trim());
+  };
+
+  const handleQRResult = async (qrData: string) => {
     setLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Parse QR code data
+      let spotData;
+      try {
+        spotData = JSON.parse(qrData);
+      } catch {
+        // If not JSON, treat as spot number
+        spotData = { spotNumber: qrData };
+      }
       
-      // Find the spot that matches user's reservation
+      // Find the spot that matches the QR code
       const spotQuery = query(
         collection(db, 'parkingSpots'),
-        where('number', '==', userReservation.spotNumber)
+        where('number', '==', spotData.spotNumber || userReservation.spotNumber)
       );
       
       const querySnapshot = await getDocs(spotQuery);
       
       if (!querySnapshot.empty) {
         const spotDoc = querySnapshot.docs[0];
-        const spotData = { id: spotDoc.id, ...spotDoc.data() } as ParkingSpot;
+        const spot = { id: spotDoc.id, ...spotDoc.data() } as ParkingSpot;
         
-        setScannedSpot(spotData);
+        // Verify this matches user's reservation
+        if (spot.number !== userReservation.spotNumber) {
+          setToast({ 
+            message: `Wrong spot! You reserved ${userReservation.spotNumber}, but scanned ${spot.number}`, 
+            color: 'danger' 
+          });
+          return;
+        }
+        
+        setScannedSpot(spot);
         setShowPaymentModal(true);
       } else {
-        setToast({ message: 'Reserved spot not found', color: 'danger' });
+        setToast({ message: 'Parking spot not found', color: 'danger' });
       }
     } catch (error) {
-      console.error('Error scanning QR:', error);
-      setToast({ message: 'Failed to scan QR code', color: 'danger' });
+      console.error('Error processing QR code:', error);
+      setToast({ message: 'Invalid QR code', color: 'danger' });
     } finally {
-      setScanning(false);
       setLoading(false);
     }
   };
 
   const handlePayment = async (spotId: string, duration: number, amount: number) => {
-    if (!currentUser || !scannedSpot) return;
+    if (!currentUser || !scannedSpot || !userReservation) return;
     
     try {
       setLoading(true);
       
-      // Create Stripe payment session (simplified)
+      const startTime = new Date();
+      const endTime = new Date(Date.now() + duration * 60 * 60 * 1000);
+      
+      // Create payment record
       const paymentData = {
         userId: currentUser.id,
         userName: currentUser.name,
@@ -117,12 +189,29 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
         amount,
         paymentMethod: 'stripe',
         status: 'paid',
-        startTime: new Date(),
-        endTime: new Date(Date.now() + duration * 60 * 60 * 1000),
+        reservationId: userReservation.id,
+        startTime,
+        endTime,
         createdAt: serverTimestamp()
       };
       
       await addDoc(collection(db, 'payments'), paymentData);
+      
+      // Update reservation payment status
+      await updateDoc(doc(db, 'reservations', userReservation.id), {
+        paymentStatus: 'paid',
+        paidAt: serverTimestamp(),
+        actualStartTime: serverTimestamp(),
+        actualEndTime: new Date(Date.now() + duration * 60 * 60 * 1000)
+      });
+      
+      // Update spot status to occupied with end time
+      await updateDoc(doc(db, 'parkingSpots', spotId), {
+        status: 'occupied',
+        occupiedBy: currentUser.id,
+        occupiedUntil: endTime,
+        lastUpdated: serverTimestamp()
+      });
       
       setToast({ 
         message: `Payment successful! You can park for ${duration} hours.`, 
@@ -169,29 +258,130 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
                   <p>You need an approved reservation to use QR payment</p>
                 )}
                 
-                <IonButton 
-                  expand="block" 
-                  size="large"
-                  onClick={simulateQRScan}
-                  disabled={loading || scanning || !userReservation}
-                  className="scan-button"
+                {/* Scan Mode Selector */}
+                <IonSegment 
+                  value={scanMode} 
+                  onIonChange={e => setScanMode(e.detail.value as 'camera' | 'manual')}
+                  style={{ marginBottom: '20px' }}
                 >
-                  <IonIcon icon={scanning ? close : camera} slot="start" />
-                  {scanning ? 'Scanning...' : 'Scan QR Code'}
-                </IonButton>
+                  <IonSegmentButton value="camera">
+                    <IonIcon icon={camera} />
+                    <IonLabel>Camera</IonLabel>
+                  </IonSegmentButton>
+                  <IonSegmentButton value="manual">
+                    <IonIcon icon={text} />
+                    <IonLabel>Manual</IonLabel>
+                  </IonSegmentButton>
+                </IonSegment>
+                
+                {scanMode === 'camera' ? (
+                  <>
+                    {/* Capacitor Camera */}
+                    {capturedImage && (
+                      <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+                        <h4>Captured QR Code Photo:</h4>
+                        <IonImg 
+                          src={capturedImage} 
+                          style={{ 
+                            maxHeight: '200px', 
+                            maxWidth: '100%',
+                            borderRadius: '8px',
+                            border: '2px solid #ccc'
+                          }} 
+                        />
+                        <p style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                          Photo saved! Now enter the QR code data manually below.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {!capturedImage && (
+                      <div style={{ 
+                        width: '100%', 
+                        maxWidth: '300px', 
+                        height: '200px', 
+                        backgroundColor: '#f0f0f0',
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto 20px auto',
+                        border: '2px dashed #ccc'
+                      }}>
+                        <div style={{ textAlign: 'center' }}>
+                          <IonIcon icon={camera} size="large" color="medium" />
+                          <p style={{ color: '#666', margin: '8px 0 0 0' }}>
+                            Take a photo of the QR code
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <IonButton 
+                      expand="block" 
+                      size="large"
+                      onClick={takePhotoForQR}
+                      disabled={loading || !userReservation}
+                      className="scan-button"
+                      color="primary"
+                    >
+                      <IonIcon icon={camera} slot="start" />
+                      {capturedImage ? 'Take Another Photo' : 'Take Photo of QR Code'}
+                    </IonButton>
+                    
+                    {capturedImage && (
+                      <p style={{ 
+                        textAlign: 'center', 
+                        fontSize: '14px', 
+                        color: '#666',
+                        marginTop: '16px'
+                      }}>
+                        Switch to "Manual" tab to enter the QR code data from your photo
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Manual Input */}
+                    <IonItem style={{ marginBottom: '20px' }}>
+                      <IonLabel position="stacked">QR Code Data</IonLabel>
+                      <IonInput
+                        value={manualInput}
+                        onIonInput={e => setManualInput(e.detail.value!)}
+                        placeholder="Paste QR code data or enter spot number"
+                      />
+                    </IonItem>
+                    
+                    <IonButton 
+                      expand="block" 
+                      size="large"
+                      onClick={handleManualInput}
+                      disabled={loading || !userReservation || !manualInput.trim()}
+                      className="scan-button"
+                    >
+                      <IonIcon icon={qrCode} slot="start" />
+                      Process QR Code
+                    </IonButton>
+                  </>
+                )}
               </div>
             </IonCardContent>
           </IonCard>
 
           <IonCard className="instructions-card">
             <IonCardContent>
-              <h3>How it works</h3>
+              <h3>How to get QR code data</h3>
               <ul>
-                <li>Find an available parking spot</li>
-                <li>Scan the QR code on the spot</li>
-                <li>Select parking duration</li>
-                <li>Pay securely with Stripe</li>
-                <li>Start parking immediately</li>
+                <li><strong>Camera:</strong> Point camera at QR code on parking spot</li>
+                <li><strong>Manual Options:</strong></li>
+                <ul>
+                  <li>Just enter your reserved spot number (e.g., "A-001")</li>
+                  <li>Ask admin to show you the QR code data</li>
+                  <li>Copy QR data from admin panel if you have access</li>
+                  <li>Use another phone to scan and copy the text</li>
+                </ul>
+                <li><strong>Example:</strong> For spot A-001, just type "A-001"</li>
+                <li>Make sure you're at the correct reserved spot</li>
               </ul>
             </IonCardContent>
           </IonCard>
@@ -205,11 +395,16 @@ const QRScanner: React.FC<QRScannerProps> = ({ onClose }) => {
           }}
           spot={scannedSpot}
           onPayment={handlePayment}
+          reservation={userReservation ? {
+            duration: userReservation.duration,
+            totalCost: userReservation.totalCost,
+            spotNumber: userReservation.spotNumber
+          } : null}
         />
 
         <IonLoading
           isOpen={loading}
-          message={scanning ? 'Scanning QR code...' : 'Processing payment...'}
+          message={isScanning ? 'Scanning QR code...' : 'Processing payment...'}
         />
 
         <IonToast

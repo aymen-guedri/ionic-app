@@ -37,6 +37,9 @@ export interface ParkingSpot {
   pricePerHour: number; // Base price in TND
   features: string[]; // ['covered', 'electric_charging', 'security_camera']
   qrCode?: string; // QR code for check-in
+  occupiedBy?: string; // User ID who is currently occupying
+  occupiedUntil?: Date; // When the spot will be available again
+  lastUpdated?: Date; // Last status update
 }
 
 // Reservation interface - represents a parking reservation

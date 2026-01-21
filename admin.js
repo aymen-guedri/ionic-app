@@ -3,7 +3,6 @@ import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, setDoc, doc, serverTimestamp } from 'firebase/firestore';
 import dotenv from 'dotenv';
 
-// Load environment variables
 dotenv.config();
 
 const firebaseConfig = {

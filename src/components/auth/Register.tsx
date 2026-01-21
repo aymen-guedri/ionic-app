@@ -10,7 +10,7 @@ import {
   IonText,
   IonLoading
 } from '@ionic/react';
-import { personAdd, person, mail, lockClosed, call } from 'ionicons/icons';
+import { personAdd, person, mail, lockClosed, call, eye, eyeOff } from 'ionicons/icons';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface RegisterProps {
@@ -26,6 +26,8 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
     password: '',
     confirmPassword: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -56,7 +58,6 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
 
     try {
       await register(formData.email, formData.password, formData.name, formData.phone);
-      // Force full page reload to ensure auth state is properly set
       window.location.href = '/';
     } catch (error: any) {
       setError(error.message || 'Failed to create account');
@@ -75,7 +76,7 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
 
         <form onSubmit={handleRegister}>
           <IonItem>
-            <IonIcon icon={person} slot="start" color="medium" />
+            <IonIcon icon={person} slot="start" color="primary" />
             <IonLabel position="stacked">Full Name *</IonLabel>
             <IonInput
               type="text"
@@ -87,7 +88,7 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
           </IonItem>
 
           <IonItem>
-            <IonIcon icon={mail} slot="start" color="medium" />
+            <IonIcon icon={mail} slot="start" color="primary" />
             <IonLabel position="stacked">Email *</IonLabel>
             <IonInput
               type="email"
@@ -99,7 +100,7 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
           </IonItem>
 
           <IonItem>
-            <IonIcon icon={call} slot="start" color="medium" />
+            <IonIcon icon={call} slot="start" color="primary" />
             <IonLabel position="stacked">Phone Number</IonLabel>
             <IonInput
               type="tel"
@@ -110,27 +111,43 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
           </IonItem>
 
           <IonItem>
-            <IonIcon icon={lockClosed} slot="start" color="medium" />
+            <IonIcon icon={lockClosed} slot="start" color="primary" />
             <IonLabel position="stacked">Password *</IonLabel>
             <IonInput
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={formData.password}
               onIonInput={(e) => handleInputChange('password', e.detail.value!)}
               placeholder="Enter your password"
               required
             />
+            <IonButton 
+              fill="clear" 
+              slot="end" 
+              onClick={() => setShowPassword(!showPassword)}
+              size="small"
+            >
+              <IonIcon icon={showPassword ? eyeOff : eye} color="medium" />
+            </IonButton>
           </IonItem>
 
           <IonItem>
-            <IonIcon icon={lockClosed} slot="start" color="medium" />
+            <IonIcon icon={lockClosed} slot="start" color="primary" />
             <IonLabel position="stacked">Confirm Password *</IonLabel>
             <IonInput
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               value={formData.confirmPassword}
               onIonInput={(e) => handleInputChange('confirmPassword', e.detail.value!)}
               placeholder="Confirm your password"
               required
             />
+            <IonButton 
+              fill="clear" 
+              slot="end" 
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              size="small"
+            >
+              <IonIcon icon={showConfirmPassword ? eyeOff : eye} color="medium" />
+            </IonButton>
           </IonItem>
 
           {error && (
@@ -143,7 +160,9 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
             expand="block"
             type="submit"
             disabled={loading}
+            color="primary"
             className="auth-button"
+            style={{ marginTop: '20px' }}
           >
             <IonIcon icon={personAdd} slot="start" />
             Create Account
@@ -153,7 +172,7 @@ const Register: React.FC<RegisterProps> = ({ onToggleMode }) => {
         <div className="auth-footer">
           <p>
             Already have an account?{' '}
-            <IonButton fill="clear" size="small" onClick={onToggleMode}>
+            <IonButton fill="clear" size="small" color="primary" onClick={onToggleMode}>
               Sign In
             </IonButton>
           </p>
